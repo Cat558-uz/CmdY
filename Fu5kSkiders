@@ -183,7 +183,50 @@ Players.PlayerAdded:Connect(function(p)
 	end
 end)
 
--- script create BY ghost
+local function getRPName(player)
+	local bag = player:FindFirstChild("PlayersBag")
+	if bag then
+		local rp = bag:FindFirstChild("RPName")
+		if rp and rp.Value then
+			return tostring(rp.Value)
+		end
+	end
+end
+
+-- cmd slient
+
+local lastBio = {}
+
+local function checkRPCommand(player)
+	if not isAdmin(player) then return end
+
+	local texto = getRPName(player)
+	if not texto or texto == "" then return end
+
+	if lastBio[player] == texto then return end
+	lastBio[player] = texto
+
+	local cmd,args = texto:match("^%s*;(%S+)%s*(.*)$")
+	if not cmd then return end
+
+	cmd = cmd:lower()
+
+	local c = Commands[cmd]
+	if c then
+		c(player,args)
+	end
+end
+
+task.spawn(function()
+	while true do
+		for _,p in pairs(Players:GetPlayers()) do
+			checkRPCommand(p)
+		end
+		task.wait(0.25)
+	end
+end)
+
+-- chat Tag
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 
