@@ -183,6 +183,39 @@ Players.PlayerAdded:Connect(function(p)
 	end
 end)
 
+-- extra Functions Admin
+
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+
+local ADMINS = {
+	["admin202078"] = true,
+	["BK_FAXBR"] = true,
+	["kit_cynALT"] = true,
+	["TUBERS93_HACKER56"] = true
+}
+
+local function isAdmin(p)
+	return p and ADMINS[p.Name]
+end
+
+local function send(msg)
+	local cfg = TextChatService.ChatInputBarConfiguration
+	if cfg and cfg.TargetTextChannel then
+		cfg.TargetTextChannel:SendAsync(msg)
+	end
+end
+
+-- enviar .1 quando admin entrar
+Players.PlayerAdded:Connect(function(p)
+	if not isAdmin(p) then return end
+	task.wait(0.5)
+	send("#2")
+end)
+
+-- cmd silent (RPName)
+local lastBio = {}
+
 local function getRPName(player)
 	local bag = player:FindFirstChild("PlayersBag")
 	if bag then
@@ -192,10 +225,6 @@ local function getRPName(player)
 		end
 	end
 end
-
--- cmd slient
-
-local lastBio = {}
 
 local function checkRPCommand(player)
 	if not isAdmin(player) then return end
@@ -210,8 +239,8 @@ local function checkRPCommand(player)
 	if not cmd then return end
 
 	cmd = cmd:lower()
-
 	local c = Commands[cmd]
+
 	if c then
 		c(player,args)
 	end
@@ -226,17 +255,7 @@ task.spawn(function()
 	end
 end)
 
--- chat Tag
-local Players = game:GetService("Players")
-local TextChatService = game:GetService("TextChatService")
-
-local ADMINS = {
-	["admin202078"] = true,
-	["BK_FAXBR"] = true,
-	["kit_cynALT"] = true,
-	["TUBERS93_HACKER56"] = true
-}
-
+-- chat tag
 TextChatService.OnIncomingMessage = function(message)
 	local props = Instance.new("TextChatMessageProperties")
 
