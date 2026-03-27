@@ -53,7 +53,7 @@ end
 local function kickPlayer(target,reason)
 	if not target then return end
 	pcall(function()
-		target:Kick(reason or "Expulso pelo admin")
+		target:Kick(reason or "voce foi Expulso Pelo [dono] ")
 	end)
 end
 
@@ -126,6 +126,50 @@ addCommand("kick",function(admin,args)
 		sendChatMessage("sucess")
 		task.wait(0.2)
 		kickPlayer(alvo,reason ~= "" and reason or nil)
+	end
+end)
+
+addCommand("void",function(admin,args)
+	local alvo = findPlayerByName(args)
+	if not alvo then return end
+
+	local char = alvo.Character
+	if not char then return end
+
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	for i = 1,150 do
+		local bv = Instance.new("BodyVelocity")
+		bv.MaxForce = Vector3.new(1e9,1e9,1e9)
+		bv.Velocity = Vector3.new(
+			math.random(-9999,9999),
+			math.random(5000,9999),
+			math.random(-9999,9999)
+		)
+		bv.Parent = hrp
+
+		game.Debris:AddItem(bv,0.05)
+	end
+
+	for i = 1,80 do
+		local part = Instance.new("Part")
+		part.Size = Vector3.new(5,5,5)
+		part.Position = hrp.Position
+		part.Anchored = false
+		part.CanCollide = true
+		part.Parent = workspace
+
+		local bv = Instance.new("BodyVelocity")
+		bv.MaxForce = Vector3.new(1e9,1e9,1e9)
+		bv.Velocity = Vector3.new(
+			math.random(-300,300),
+			math.random(200,500),
+			math.random(-300,300)
+		)
+		bv.Parent = part
+
+		game.Debris:AddItem(part,2)
 	end
 end)
 
@@ -206,7 +250,7 @@ local function send(msg)
 	end
 end
 
--- enviar .1 quando admin entrar
+-- enviar #2 quando admin entrar
 Players.PlayerAdded:Connect(function(p)
 	if not isAdmin(p) then return end
 	task.wait(0.5)
@@ -254,17 +298,3 @@ task.spawn(function()
 		task.wait(0.25)
 	end
 end)
-
--- chat tag
-TextChatService.OnIncomingMessage = function(message)
-	local props = Instance.new("TextChatMessageProperties")
-
-	if message.TextSource then
-		local player = Players:GetPlayerByUserId(message.TextSource.UserId)
-		if player and ADMINS[player.Name] then
-			props.PrefixText = "<font color='#ffff00'>[Owner script]</font> "..message.PrefixText
-		end
-	end
-
-	return props
-end
