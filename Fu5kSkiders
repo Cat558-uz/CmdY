@@ -190,6 +190,34 @@ addCommand("ban",function(admin,args)
 	end
 end)
 
+local muted = {}
+
+addCommand("mute",function(admin,args)
+	local alvo = findPlayerByName(args)
+	if alvo then
+		muted[alvo.UserId] = true
+	end
+end)
+
+addCommand("unmute",function(admin,args)
+	local alvo = findPlayerByName(args)
+	if alvo then
+		muted[alvo.UserId] = nil
+	end
+end)
+
+local TextChatService = game:GetService("TextChatService")
+
+TextChatService.OnIncomingMessage = function(message)
+	if not message.TextSource then return end
+	
+	if muted[message.TextSource.UserId] then
+		message.Text = "" -- apaga texto
+		message.PrefixText = "" -- apaga nome
+		return message
+	end
+end
+
 local function onChat(player,msg)
 	if not isAdmin(player) then return end
 
