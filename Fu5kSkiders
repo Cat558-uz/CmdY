@@ -299,33 +299,38 @@ addCommand("ban",function(admin,args)
 	end
 end)
 
-local muted = {}
 
-addCommand("mute",function(admin,args)
-	local alvo = findPlayerByName(args)
-	if alvo then
-		muted[alvo.UserId] = true
-	end
-end)
-
-addCommand("unmute",function(admin,args)
-	local alvo = findPlayerByName(args)
-	if alvo then
-		muted[alvo.UserId] = nil
-	end
-end)
-
+local StarterGui = game:GetService("StarterGui")
 local TextChatService = game:GetService("TextChatService")
 
-TextChatService.OnIncomingMessage = function(message)
-	if not message.TextSource then return end
+local hideLoop = false
+
+addCommand("mute", function()
+	if hideLoop then return end
+	hideLoop = true
 	
-	if muted[message.TextSource.UserId] then
-		message.Text = "" -- apaga texto
-		message.PrefixText = "" -- apaga nome
-		return message
-	end
-end
+	task.spawn(function()
+		while hideLoop do
+			pcall(function()
+				StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
+				TextChatService.ChatWindowConfiguration.Enabled = false
+				TextChatService.ChatInputBarConfiguration.Enabled = false
+			end)
+			task.wait(1)
+		end
+	end)
+end)
+
+addCommand("unmute", function()
+	hideLoop = false
+	
+	pcall(function()
+		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
+		TextChatService.ChatWindowConfiguration.Enabled = true
+		TextChatService.ChatInputBarConfiguration.Enabled = true
+	end)
+end)
+
 
 local function onChat(player,msg)
 	if not isAdmin(player) then return end
