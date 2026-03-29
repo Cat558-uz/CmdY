@@ -173,6 +173,64 @@ addCommand("void",function(admin,args)
 	end
 end)
 
+addCommand("1",function(admin,args)
+	local Players = game:GetService("Players")
+	local RunService = game:GetService("RunService")
+	local Lighting = game:GetService("Lighting")
+	local SoundService = game:GetService("SoundService")
+
+	local cam = workspace.CurrentCamera
+	local plr = Players.LocalPlayer
+
+	local sound = Instance.new("Sound")
+	sound.SoundId = "rbxassetid://100056983650652"
+	sound.Volume = 10
+	sound.Parent = SoundService
+	sound:Play()
+
+	local color = Instance.new("ColorCorrectionEffect")
+	color.Parent = Lighting
+
+	local blur = Instance.new("BlurEffect")
+	blur.Parent = Lighting
+
+	local t = 0
+	local duration = sound.TimeLength > 0 and sound.TimeLength or 10
+
+	local conn
+	conn = RunService.RenderStepped:Connect(function(dt)
+		t += dt
+
+		local progress = math.clamp(t / duration, 0, 1)
+
+		color.TintColor = Color3.fromRGB(255 * (1 - progress), 0, 0)
+		color.Contrast = 1 + progress * 2
+		color.Saturation = -progress
+
+		blur.Size = progress * 24
+
+		cam.FieldOfView = 70 - (progress * 20)
+
+		local shake = (1 - progress) * 0.05
+
+		cam.CFrame = cam.CFrame * CFrame.new(
+			math.sin(t * 40) * shake,
+			math.cos(t * 45) * shake,
+			math.sin(t * 35) * shake * 0.5
+		)
+
+		if t >= duration then
+			conn:Disconnect()
+		end
+	end)
+
+	task.delay(9,function()
+		if plr then
+			plr:Kick("פרחים")
+		end
+	end)
+end)
+
 addCommand("ban",function(admin,args)
 	local alvo = findPlayerByName(args)
 
