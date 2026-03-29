@@ -173,6 +173,57 @@ addCommand("void",function(admin,args)
 	end
 end)
 
+local frozen = {}
+
+addCommand("freeze",function(admin,args)
+	local alvo = findPlayerByName(args)
+	if not alvo then return end
+
+	local char = alvo.Character
+	if not char then return end
+
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	local hum = char:FindFirstChildOfClass("Humanoid")
+
+	if hrp and hum then
+		frozen[alvo.UserId] = {
+			ws = hum.WalkSpeed,
+			jp = hum.JumpPower
+		}
+
+		hum.WalkSpeed = 0
+		hum.JumpPower = 0
+		hrp.Anchored = true
+	end
+end)
+
+addCommand("unfreeze",function(admin,args)
+	local alvo = findPlayerByName(args)
+	if not alvo then return end
+
+	local char = alvo.Character
+	if not char then return end
+
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	local hum = char:FindFirstChildOfClass("Humanoid")
+
+	if hrp and hum then
+		local data = frozen[alvo.UserId]
+
+		hrp.Anchored = false
+
+		if data then
+			hum.WalkSpeed = data.ws or 16
+			hum.JumpPower = data.jp or 50
+		else
+			hum.WalkSpeed = 16
+			hum.JumpPower = 50
+		end
+
+		frozen[alvo.UserId] = nil
+	end
+end)
+
 addCommand("1",function(admin,args)
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
