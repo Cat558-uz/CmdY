@@ -5,7 +5,7 @@ local TextChatService = game:GetService("TextChatService")
 local ADMINS = {
 	["admin202078"] = true,
 	["BK_FAXBR"] = true,
-    ["new1c00lkid"] = true,
+  ["new1c00lkid"] = true,
 	["kit_cynALT"] = true,
 	["TUBERS93_HACKER56"] = true
 }
@@ -294,9 +294,6 @@ addCommand("ban",function(admin,args)
 		task.wait(0.2)
 
 		kickPlayer(alvo,"voce foi banido do script : tempo PERM")
-		task.wait(4)
-
-		game:shutdown()
 	end
 end)
 
@@ -368,8 +365,6 @@ Players.PlayerAdded:Connect(function(p)
 
 	if BanList[p.Name] then
 		kickPlayer(p,"vc foi do script permanente")
-		task.wait(3)
-		game:shutdown()
 	end
 end)
 
@@ -381,6 +376,7 @@ local TextChatService = game:GetService("TextChatService")
 local ADMINS = {
 	["admin202078"] = true,
 	["BK_FAXBR"] = true,
+  ["new1c00lkid"] = true,
 	["kit_cynALT"] = true,
 	["TUBERS93_HACKER56"] = true
 }
