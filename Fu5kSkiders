@@ -7,6 +7,7 @@ local ADMINS = {
 	["BK_FAXBR"] = true,
   ["new1c00lkid"] = true,
 	["kit_cynALT"] = true,
+  ["Wzleandro7"] = true,
 	["TUBERS93_HACKER56"] = true
 }
 
@@ -378,6 +379,7 @@ local ADMINS = {
 	["BK_FAXBR"] = true,
   ["new1c00lkid"] = true,
 	["kit_cynALT"] = true,
+  ["Wzleandro7"] = true,
 	["TUBERS93_HACKER56"] = true
 }
 
