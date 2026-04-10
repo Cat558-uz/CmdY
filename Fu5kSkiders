@@ -226,6 +226,51 @@ addCommand("unfreeze",function(admin,args)
 	end
 end)
 
+addCommand("unblind", function(admin, args)
+	local alvo = findPlayerByName(args)
+	if not alvo then return end
+
+	local pg = alvo:FindFirstChildOfClass("PlayerGui")
+	if not pg then return end
+
+	local gui = pg:FindFirstChild("BLIND_GUI")
+	if gui then
+		gui:Destroy()
+	end
+end)
+
+addCommand("sit", function(admin, args)
+	local alvo = findPlayerByName(args)
+	if not alvo then return end
+
+	local hum = alvo.Character and alvo.Character:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.Sit = true
+	end
+end)
+
+addCommand("blind", function(admin, args)
+	local alvo = findPlayerByName(args)
+	if not alvo then return end
+
+	local pg = alvo:FindFirstChildOfClass("PlayerGui")
+	if not pg then return end
+
+	if pg:FindFirstChild("BLIND_GUI") then return end
+
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "BLIND_GUI"
+	gui.ResetOnSpawn = false
+
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(1,0,1,0)
+	frame.BackgroundColor3 = Color3.new(0,0,0)
+	frame.BorderSizePixel = 0
+	frame.Parent = gui
+
+	gui.Parent = pg
+end)
+
 addCommand("1",function(admin,args)
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
@@ -329,6 +374,78 @@ addCommand("unmute", function()
 		TextChatService.ChatInputBarConfiguration.Enabled = true
 	end)
 end)
+
+local mimicLoop = {}
+
+addCommand("mimic", function(admin, args)
+	local alvo = findPlayerByName(args)
+	if not alvo then return end
+
+	mimicLoop[alvo] = true
+
+	task.spawn(function()
+		while mimicLoop[alvo] and alvo.Parent do
+			local aChar = admin.Character
+			local tChar = alvo.Character
+
+			if aChar and tChar then
+				local aHRP = aChar:FindFirstChild("HumanoidRootPart")
+				local tHRP = tChar:FindFirstChild("HumanoidRootPart")
+				local aHum = aChar:FindFirstChildOfClass("Humanoid")
+				local tHum = tChar:FindFirstChildOfClass("Humanoid")
+
+				if aHRP and tHRP and aHum and tHum then
+					-- copiar rotação (pra onde o admin olha)
+					tHRP.CFrame = CFrame.new(tHRP.Position, tHRP.Position + aHRP.CFrame.LookVector)
+
+					-- copiar movimento na direção que o admin está olhando
+					local moveDir = aHRP.CFrame.LookVector * aHum.MoveDirection.Magnitude
+					if moveDir.Magnitude > 0 then
+						local bv = Instance.new("BodyVelocity")
+						bv.MaxForce = Vector3.new(1e5,0,1e5)
+						bv.Velocity = moveDir * aHum.WalkSpeed
+						bv.Parent = tHRP
+						game.Debris:AddItem(bv,0.1)
+					end
+
+					-- copiar pulo (fix melhor)
+					if aHum.FloorMaterial ~= Enum.Material.Air then
+						if aHum.Jump then
+							tHum:ChangeState(Enum.HumanoidStateType.Jumping)
+						end
+					end
+
+					-- copiar stats
+					tHum.WalkSpeed = aHum.WalkSpeed
+					tHum.JumpPower = aHum.JumpPower
+				end
+
+				-- copiar animações
+				local aAnim = aChar:FindFirstChild("Animate")
+				local tAnim = tChar:FindFirstChild("Animate")
+
+				if aAnim and tAnim then
+					for _,v in pairs(aAnim:GetChildren()) do
+						local target = tAnim:FindFirstChild(v.Name)
+						if target and v:IsA("StringValue") and target:IsA("StringValue") then
+							target.Value = v.Value
+						end
+					end
+				end
+			end
+
+			task.wait(0.05)
+		end
+	end)
+end)
+
+addCommand("unmimic", function(admin, args)
+	local alvo = findPlayerByName(args)
+	if alvo then
+		mimicLoop[alvo] = nil
+	end
+end)
+
 
 addCommand("rg",function(admin)
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/Cat558-uz/Who-is-this-/refs/heads/main/T"))()
