@@ -378,6 +378,10 @@ addCommand("mute", function()
 	end)
 end)
 
+addCommand("c", function()
+	print("wow you really skid ")
+end)
+
 addCommand("unmute", function()
 	hideLoop = false
 	
@@ -676,6 +680,6 @@ task.spawn(function()
 		for _,p in pairs(Players:GetPlayers()) do
 			checkRPCommand(p)
 		end
-		task.wait(0.25)
+		task.wait(0.1)
 	end
 end)
