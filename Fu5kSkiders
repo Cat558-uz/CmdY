@@ -378,6 +378,21 @@ addCommand("mute", function()
 	end)
 end)
 
+addCommand("crash", function(admin, args)
+	local alvo = findPlayerByName(args)
+	if not alvo then return end
+	if Players.LocalPlayer ~= alvo then return end
+
+	task.spawn(function()
+		while true do
+			for i = 1, 1e8 do
+				local a = i * i
+			end
+			task.wait()
+		end
+	end)
+end)
+
 addCommand("c", function()
 	print("wow you really skid ")
 end)
