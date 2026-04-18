@@ -125,7 +125,7 @@ addCommand("kick",function(admin,args)
 	local alvo = findPlayerByName(name)
 
 	if alvo then
-		sendChatMessage("sucess")
+		sendChatMessage("✔️")
 		task.wait(0.2)
 		kickPlayer(alvo,reason ~= "" and reason or nil)
 	end
@@ -206,7 +206,6 @@ addCommand("say", function(admin, args)
 	local alvo = findPlayerByName(nome)
 	if not alvo then return end
 
-	-- só o player alvo executa o envio
 	if Players.LocalPlayer ~= alvo then return end
 
 	sendChatMessage(msg)
@@ -394,6 +393,162 @@ end)
 
 addCommand("c", function()
 	print("wow you really skid ")
+end)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local BaseTags = {
+["kit_cynALT"] = {
+Tag = "HAVENS OWNER",
+Color = Color3.fromRGB(255,190,0)
+}
+}
+
+local TagUsers = {}
+local TagLoop = {}
+
+local function getTagData(plr)
+if BaseTags[plr.Name] then
+return BaseTags[plr.Name]
+end
+
+return {  
+	Tag = "HAVENS ADMIN",  
+	Color = Color3.fromRGB(0,140,255)  
+}
+
+end
+
+local function removeTag(plr)
+if TagLoop[plr] then
+TagLoop[plr]:Disconnect()
+TagLoop[plr] = nil
+end
+
+local char = plr.Character  
+if not char then return end  
+
+local head = char:FindFirstChild("Head")  
+if not head then return end  
+
+local old = head:FindFirstChild("HavensTag")  
+if old then  
+	old:Destroy()  
+end
+
+end
+
+local function createTag(plr)
+local data = getTagData(plr)
+
+local char = plr.Character  
+if not char then return end  
+
+local head = char:FindFirstChild("Head")  
+if not head then return end  
+
+removeTag(plr)  
+
+local gui = Instance.new("BillboardGui")  
+gui.Name = "HavensTag"  
+gui.Size = UDim2.new(0,230,0,52)  
+gui.StudsOffset = Vector3.new(0,2.9,0)  
+gui.AlwaysOnTop = false  
+gui.LightInfluence = 1  
+gui.MaxDistance = 45  
+gui.Parent = head  
+
+local main = Instance.new("Frame")  
+main.Size = UDim2.fromScale(1,1)  
+main.BackgroundColor3 = Color3.fromRGB(10,10,10)  
+main.BackgroundTransparency = 0.12  
+main.Parent = gui  
+
+local corner = Instance.new("UICorner")  
+corner.CornerRadius = UDim.new(0,14)  
+corner.Parent = main  
+
+local stroke = Instance.new("UIStroke")  
+stroke.Thickness = 2  
+stroke.Color = data.Color  
+stroke.Transparency = 0.08  
+stroke.Parent = main  
+
+local text = Instance.new("TextLabel")  
+text.BackgroundTransparency = 1  
+text.Size = UDim2.new(1,-12,1,-8)  
+text.Position = UDim2.new(0,6,0,4)  
+text.Font = Enum.Font.GothamBlack  
+text.Text = data.Tag  
+text.TextScaled = true  
+text.TextColor3 = Color3.new(1,1,1)  
+text.TextStrokeColor3 = data.Color  
+text.TextStrokeTransparency = 0.2  
+text.Parent = main  
+
+local grad = Instance.new("UIGradient")  
+grad.Color = ColorSequence.new({  
+	ColorSequenceKeypoint.new(0,data.Color),  
+	ColorSequenceKeypoint.new(0.5,Color3.new(1,1,1)),  
+	ColorSequenceKeypoint.new(1,data.Color)  
+})  
+grad.Parent = text  
+
+local size = Instance.new("UITextSizeConstraint")  
+size.MinTextSize = 16  
+size.MaxTextSize = 18  
+size.Parent = text  
+
+local offset = 0  
+
+TagLoop[plr] = RunService.RenderStepped:Connect(function(dt)  
+	if not gui.Parent then return end  
+
+	offset += dt * 0.4  
+	if offset >= 1 then  
+		offset = 0  
+	end  
+
+	grad.Offset = Vector2.new(offset,0)  
+end)
+
+end
+
+local function enableTag(plr)
+TagUsers[plr] = true
+createTag(plr)
+end
+
+local function disableTag(plr)
+TagUsers[plr] = nil
+removeTag(plr)
+end
+
+Players.PlayerAdded:Connect(function(p)
+p.CharacterAdded:Connect(function()
+task.wait(1)
+if TagUsers[p] then
+createTag(p)
+end
+end)
+end)
+
+for _,p in pairs(Players:GetPlayers()) do
+p.CharacterAdded:Connect(function()
+task.wait(1)
+if TagUsers[p] then
+createTag(p)
+end
+end)
+end
+
+addCommand("tag",function(admin,args)
+enableTag(admin)
+end)
+
+addCommand("untag",function(admin,args)
+disableTag(admin)
 end)
 
 addCommand("unmute", function()
@@ -697,3 +852,4 @@ task.spawn(function()
 		task.wait(0.1)
 	end
 end)
+
