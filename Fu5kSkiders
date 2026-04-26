@@ -230,7 +230,7 @@ addCommand("kick",function(admin,args)
 	local alvo = findPlayerByName(name)
 
 	if alvo then
-		sendChatMessage("✔️")
+		print("sla")
 		task.wait(0.2)
 		kickPlayer(alvo,reason ~= "" and reason or nil)
 	end
@@ -451,9 +451,6 @@ addCommand("ban",function(admin,args)
 	if alvo then
 		BanList[alvo.Name] = true
 		saveBanList()
-
-		sendChatMessage("✔️")
-		task.wait(0.2)
 
 		kickPlayer(alvo,"voce foi banido do script : tempo PERM")
 	end
