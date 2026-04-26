@@ -894,6 +894,7 @@ local ADMINS = {
 	["BK_FAXBR"] = true,
   ["new1c00lkid"] = true,
 	["kit_cynALT"] = true,
+	["enzola1237xb"] = true,
   ["Wzleandro7"] = true,
 	["TUBERS93_HACKER56"] = true
 }
@@ -957,4 +958,3 @@ task.spawn(function()
 		task.wait(0.1)
 	end
 end)
-
