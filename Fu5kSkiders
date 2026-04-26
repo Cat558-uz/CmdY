@@ -106,6 +106,110 @@ local function addCommand(name,func)
 	Commands[name] = func
 end
 
+local CuffAnim = "rbxassetid://88326388725514"
+local Cuffed = {}
+
+local function stopCuff(target)
+	local data = Cuffed[target]
+	if not data then return end
+
+	if data.Connection then
+		data.Connection:Disconnect()
+	end
+
+	if data.Track then
+		pcall(function()
+			data.Track:Stop()
+			data.Track:Destroy()
+		end)
+	end
+
+	Cuffed[target] = nil
+end
+
+local function startCuff(admin,target,tool)
+	if isAdmin(target) then return end
+
+	stopCuff(target)
+
+	local char = target.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+	local handle = tool:FindFirstChild("Handle")
+
+	if not hum or not hrp or not handle then return end
+
+	local animator = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator",hum)
+
+	local anim = Instance.new("Animation")
+	anim.AnimationId = CuffAnim
+
+	local track = animator:LoadAnimation(anim)
+	track.Looped = true
+	track.Priority = Enum.AnimationPriority.Action
+	track:Play()
+
+	Cuffed[target] = {
+		Track = track
+	}
+
+	Cuffed[target].Connection = game:GetService("RunService").Heartbeat:Connect(function()
+		if not admin.Parent or not target.Parent then
+			stopCuff(target)
+			return
+		end
+
+		if tool.Parent ~= admin.Character then
+			stopCuff(target)
+			return
+		end
+
+		local root = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+		local cuff = tool:FindFirstChild("Handle")
+
+		if not root or not cuff then
+			stopCuff(target)
+			return
+		end
+
+		root.CFrame = cuff.CFrame * CFrame.new(0,0,-1)
+	end)
+end
+
+local function loadCuffs(admin)
+	admin.CharacterAdded:Connect(function(char)
+		char.ChildAdded:Connect(function(obj)
+			if not obj:IsA("Tool") then return end
+			if obj.Name ~= "Cuffs" then return end
+
+			local handle = obj:WaitForChild("Handle")
+
+			handle.Touched:Connect(function(hit)
+				if obj.Parent ~= char then return end
+
+				local target = Players:GetPlayerFromCharacter(hit.Parent)
+				if not target then return end
+				if target == admin then return end
+				if isAdmin(target) then return end
+
+				startCuff(admin,target,obj)
+			end)
+		end)
+	end)
+end
+
+for _,p in pairs(Players:GetPlayers()) do
+	if isAdmin(p) then
+		loadCuffs(p)
+	end
+end
+
+Players.PlayerAdded:Connect(function(p)
+	if isAdmin(p) then
+		loadCuffs(p)
+	end
+end)
+
 addCommand("kill",function(admin,args)
 	local alvo = findPlayerByName(args)
 	if alvo then killPlayer(alvo) end
