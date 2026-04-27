@@ -143,15 +143,22 @@ end
 
 local function startCuff(admin,target,tool)
 	if isAdmin(target) then return end
+	if Cuffed[target] then return end
+
+	local adminChar = admin.Character
+	local adminRoot = adminChar and adminChar:FindFirstChild("HumanoidRootPart")
+	local targetChar = target.Character
+	local targetRoot = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
+
+	if not adminRoot or not targetRoot then return end
+	if (adminRoot.Position - targetRoot.Position).Magnitude > 8 then return end
 
 	stopCuff(target)
 
-	local char = target.Character
-	local hum = char and char:FindFirstChildOfClass("Humanoid")
-	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+	local hum = targetChar:FindFirstChildOfClass("Humanoid")
 	local handle = tool:FindFirstChild("Handle")
 
-	if not hum or not hrp or not handle then return end
+	if not hum or not handle then return end
 
 	local animator = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator",hum)
 
@@ -180,13 +187,54 @@ local function startCuff(admin,target,tool)
 
 		local root = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
 		local cuff = tool:FindFirstChild("Handle")
+		local adminNow = admin.Character and admin.Character:FindFirstChild("HumanoidRootPart")
 
-		if not root or not cuff then
+		if not root or not cuff or not adminNow then
+			stopCuff(target)
+			return
+		end
+
+		if (adminNow.Position - root.Position).Magnitude > 8 then
 			stopCuff(target)
 			return
 		end
 
 		root.CFrame = cuff.CFrame * CFrame.new(0,0,-1)
+	end)
+end
+
+local function watchNearby(admin,tool)
+	local running = true
+
+	tool.AncestryChanged:Connect(function()
+		if tool.Parent ~= admin.Character then
+			running = false
+		end
+	end)
+
+	task.spawn(function()
+		while running do
+			local adminChar = admin.Character
+			local adminRoot = adminChar and adminChar:FindFirstChild("HumanoidRootPart")
+
+			if adminRoot then
+				for _,target in pairs(Players:GetPlayers()) do
+					if target ~= admin and not isAdmin(target) and not Cuffed[target] then
+						local targetChar = target.Character
+						local targetRoot = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
+
+						if targetRoot then
+							local dist = (adminRoot.Position - targetRoot.Position).Magnitude
+							if dist <= 8 then
+								startCuff(admin,target,tool)
+							end
+						end
+					end
+				end
+			end
+
+			task.wait(0.1)
+		end
 	end)
 end
 
@@ -196,18 +244,7 @@ local function loadCuffs(admin)
 			if not obj:IsA("Tool") then return end
 			if obj.Name ~= "Cuffs" then return end
 
-			local handle = obj:WaitForChild("Handle")
-
-			handle.Touched:Connect(function(hit)
-				if obj.Parent ~= char then return end
-
-				local target = Players:GetPlayerFromCharacter(hit.Parent)
-				if not target then return end
-				if target == admin then return end
-				if isAdmin(target) then return end
-
-				startCuff(admin,target,obj)
-			end)
+			watchNearby(admin,obj)
 		end)
 	end)
 end
