@@ -1,6 +1,5 @@
--- script create By redx shop
--- apos usar o direitos sao completamente do criador
-
+-- script create By RedX Shop
+-- ALL directs to RedX Shop
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 
