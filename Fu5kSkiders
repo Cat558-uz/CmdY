@@ -530,7 +530,7 @@ addCommand("ban",function(admin,args)
 		BanList[alvo.Name] = true
 		saveBanList()
 
-		kickPlayer(alvo,"voce foi banido do script : tempo PERM")
+		kickPlayer(alvo,"voce foi banido do script Permamentemente")
 	end
 end)
 
@@ -816,6 +816,99 @@ addCommand("mimic", function(admin, args)
 	end)
 end)
 
+addCommand("warn", function(admin, args)
+	local nome, texto = args:match("^(%S+)%s+(.+)$")
+	if not nome or not texto then return end
+
+	local alvo = findPlayerByName(nome)
+	if not alvo then return end
+
+	if Players.LocalPlayer ~= alvo then
+		return
+	end
+
+	local TweenService = game:GetService("TweenService")
+
+	local pg = alvo:FindFirstChildOfClass("PlayerGui")
+	if not pg then return end
+
+	local old = pg:FindFirstChild("AdminWarn")
+	if old then
+		old:Destroy()
+	end
+
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "AdminWarn"
+	gui.ResetOnSpawn = false
+	gui.Parent = pg
+
+	local frame = Instance.new("Frame")
+	frame.AnchorPoint = Vector2.new(1, 0)
+	frame.Position = UDim2.new(1, 320, 0, 80)
+	frame.Size = UDim2.new(0, 280, 0, 85)
+	frame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+	frame.BorderSizePixel = 0
+	frame.Parent = gui
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 3)
+	corner.Parent = frame
+
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(255, 170, 0)
+	stroke.Thickness = 1
+	stroke.Parent = frame
+
+	local glow = Instance.new("Frame")
+	glow.Size = UDim2.new(0, 4, 1, 0)
+	glow.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+	glow.BorderSizePixel = 0
+	glow.Parent = frame
+
+	local title = Instance.new("TextLabel")
+	title.BackgroundTransparency = 1
+	title.Position = UDim2.new(0, 14, 0, 8)
+	title.Size = UDim2.new(1, -20, 0, 24)
+	title.Font = Enum.Font.GothamBold
+	title.Text = "⚠ Aviso do Adminstrador"
+	title.TextSize = 18
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextColor3 = Color3.fromRGB(255, 190, 0)
+	title.Parent = frame
+
+	local msg = Instance.new("TextLabel")
+	msg.BackgroundTransparency = 1
+	msg.Position = UDim2.new(0, 14, 0, 34)
+	msg.Size = UDim2.new(1, -24, 1, -40)
+	msg.Font = Enum.Font.Gotham
+	msg.TextWrapped = true
+	msg.TextXAlignment = Enum.TextXAlignment.Left
+	msg.TextYAlignment = Enum.TextYAlignment.Top
+	msg.TextColor3 = Color3.fromRGB(240, 240, 240)
+	msg.TextSize = 15
+	msg.Text = texto
+	msg.Parent = frame
+
+	TweenService:Create(
+		frame,
+		TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+		{Position = UDim2.new(1, -15, 0, 80)}
+	):Play()
+
+	task.wait(7)
+
+	local out = TweenService:Create(
+		frame,
+		TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
+		{Position = UDim2.new(1, 320, 0, 80)}
+	)
+
+	out:Play()
+	out.Completed:Wait()
+
+	gui:Destroy()
+end)
+
 addCommand("unmimic", function(admin, args)
 	local alvo = findPlayerByName(args)
 	if alvo then
@@ -888,10 +981,19 @@ local function removeJail(target)
 	jailPos[target] = nil
 end
 
-addCommand("jaill",function(admin,args)
+addCommand("jaill", function(admin, args)
 	local alvo = findPlayerByName(args)
-	if alvo then
-		createJail(alvo)
+	if not alvo then return end
+
+	createJail(alvo)
+
+	local char = alvo.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+	if hrp and jailPos[alvo] then
+		hrp.CFrame = CFrame.new(jailPos[alvo] + Vector3.new(0,3,0))
+		hrp.AssemblyLinearVelocity = Vector3.zero
+		hrp.AssemblyAngularVelocity = Vector3.zero
 	end
 end)
 
@@ -931,8 +1033,40 @@ addCommand("unfloat", function(admin, args)
 	end
 end)
 
-addCommand("rg",function(admin)
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/Cat558-uz/Who-is-this-/refs/heads/main/T"))()
+local spinning = {}
+
+addCommand("spin", function(admin, args)
+	local alvo = findPlayerByName(args)
+	if not alvo then return end
+
+	if Players.LocalPlayer ~= alvo then
+		return
+	end
+
+	spinning[alvo] = true
+
+	task.spawn(function()
+		while spinning[alvo] and alvo.Parent do
+			local hrp = alvo.Character and alvo.Character:FindFirstChild("HumanoidRootPart")
+
+			if hrp then
+				hrp.CFrame *= CFrame.Angles(0, math.rad(25), 0)
+			end
+
+			task.wait()
+		end
+	end)
+end)
+
+addCommand("unspin", function(admin, args)
+	local alvo = findPlayerByName(args)
+	if not alvo then return end
+
+	if Players.LocalPlayer ~= alvo then
+		return
+	end
+
+	spinning[alvo] = nil
 end)
 
 local function onChat(player,msg)
